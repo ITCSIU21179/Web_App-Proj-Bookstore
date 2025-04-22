@@ -4,14 +4,13 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 const hostname = process.env.HOST_Name || 'localhost';
+const webRoutes = require('./src/route/web');
 
-app.set('views', './src/views/');
-app.set('view engine', 'ejs');
-app.use(express.static('./src/public'));
+const configViewEngine = require('./src/config/viewEngine');
 
-app.get('/', (req, res) => {
-  res.render('HomePage.ejs');
-});
+configViewEngine(app);
+
+app.use('/', webRoutes);
 
 app.listen(port, hostname, () => {
   console.log(`Example app listening on port ${port}`);
