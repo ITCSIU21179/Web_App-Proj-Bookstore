@@ -12,6 +12,8 @@ const {
   logout 
 } = require('../controller/authController');
 
+const {getAllBooks} = require('../controller/productController');
+
 const { 
   registerValidationRules, 
   loginValidationRules 
@@ -36,6 +38,8 @@ router.get('/register', isNotAuthenticated, getRegisterPage);
 router.post('/register', registerValidationRules, register);
 router.get('/logout', logout);
 
+// 2. Products data 
+router.get('/allbooks',getAllBooks);
 // Protected routes example
 router.get('/account', isAuthenticated, (req, res) => {
   res.render('account', { user: req.session.user });
