@@ -2,12 +2,16 @@ const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 const authModel = require('../model/authModel');
 
-const getLoginPage = (req, res) => {
-  res.render('login', { errors: [], email: '' });
-};
+// const getLoginPage = (req, res) => {
+//   res.render('login', { errors: [], email: '' });
+// };
 
 const getRegisterPage = (req, res) => {
-  res.render('register', { errors: [], name: '', email: '' });
+  res.render('registerPage.ejs', 
+    { 
+      // isLoggedIn: false, 
+      errors: [], name: '', email: '' 
+    });
 };
 
 // Modify your login function to handle both AJAX and traditional form submissions
@@ -69,12 +73,12 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    // return res.render('register', { 
-    //   errors: errors.array(), 
-    //   name: req.body.name, 
-    //   email: req.body.email 
-    // });
-    return res.status(400).json({ errors: errors.array() });
+    return res.render('registerPage.ejs', { 
+      // isLoggedIn: false,
+      errors: errors.array(), 
+      name: req.body.name, 
+      email: req.body.email 
+    });
   }
 
   try {
@@ -83,7 +87,8 @@ const register = async (req, res) => {
     // Check if user already exists
     const existingUser = await authModel.getUserByEmail(email);
     if (existingUser) {
-      return res.render('register', { 
+      return res.render('registerPage.ejs', {
+        // isLoggedIn: false,  
         errors: [{ msg: 'Email already in use' }], 
         name, 
         email 
@@ -97,13 +102,13 @@ const register = async (req, res) => {
     // Save user to database
     await authModel.createUser(name, email, password_hash, phone, address);
     
-
     // Redirect to homepage or dashboard
     res.redirect('/homepage');
     
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).render('register', { 
+    res.status(500).render('register.ejs', { 
+      // isLoggedIn: false,
       errors: [{ msg: 'Server error. Please try again.' }], 
       name: req.body.name, 
       email: req.body.email 
@@ -122,7 +127,7 @@ const logout = (req, res) => {
 };
 
 module.exports = {
-  getLoginPage,
+  // getLoginPage,
   getRegisterPage,
   login,
   register,

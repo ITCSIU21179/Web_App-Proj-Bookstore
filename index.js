@@ -16,16 +16,16 @@ app.use(session({
   name: 'sessionId',
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    maxAge: 60 * 60 * 1000 // 1 hour
   }
 }));
 
 // Add middleware to make user data available to all views
-// app.use((req, res, next) => {
-//   res.locals.isLoggedIn = req.session && req.session.user ? true : false;
-//   res.locals.currentUser = req.session ? req.session.user : null;
-//   next();
-// });
+app.use((req, res, next) => {
+  res.locals.isLoggedIn = req.session && req.session.user ? true : false;
+  res.locals.currentUser = req.session ? req.session.user : null;
+  next();
+});
 
 // Configure view engine
 configViewEngine(app);

@@ -24,7 +24,7 @@
                 <div class="col-md-6">
                     <div class="right-element">
                         <a href="#" class="user-account for-buy"><i class="icon icon-user"></i><span>
-                                <%= isLoggedIn && typeof NameOfUser !=='undefined' ? NameOfUser : 'Account' %>
+                                <%= isLoggedIn && typeof NameOfUser !== 'undefined' ? NameOfUser : 'Account' %>
                             </span></a>
                         <a href="#" class="cart for-buy"><i class="icon icon-clipboard"></i><span>Cart:(0$)</span></a>
 
@@ -150,7 +150,7 @@
                 const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
                 loginModal.show();
             } else {
-                window.location.href = '/account';
+                window.location.href = '/profile';
             }
         });
 
