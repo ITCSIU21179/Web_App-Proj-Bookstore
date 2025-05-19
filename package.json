@@ -1,0 +1,24 @@
+{
+  "name": "web_app-proj-bookstore",
+  "version": "1.0.0",
+  "description": "Web_App-Proj-Bookstore is a web application designed to manage and browse a collection of books. Users can view available books, search by title or author, and manage their own book lists. The project demonstrates modern web development practices using technologies such as Node.js, Express, and a frontend framework (e.g., React or Angular).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "16.5.0",
+    "ejs": "3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.2.1",
+    "mysql2": "^3.14.1"
+  },
+  "devDependencies": {
+    "nodemon": "3.1.9"
+  }
+}
