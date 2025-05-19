@@ -27,7 +27,6 @@ const {
   isAuthenticated, 
   isNotAuthenticated 
 } = require('../middleware/authMiddleware');
-const e = require('express');
 
 // Body parser for form data
 router.use(express.urlencoded({ extended: true }));
@@ -48,5 +47,4 @@ router.get('/allbooks',getAllBooks);
 // User protected routes example
 router.get('/profile', isAuthenticated, getProfile);
 router.post('/edit-profile', isAuthenticated, editProfile);
-
 module.exports = router;
