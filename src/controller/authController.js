@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 const authModel = require('../model/authModel');
 
-<<<<<<< HEAD
 // const getLoginPage = (req, res) => {
 //   res.render('login', { errors: [], email: '' });
 // };
@@ -13,14 +12,6 @@ const getRegisterPage = (req, res) => {
       // isLoggedIn: false, 
       errors: [], name: '', email: '' 
     });
-=======
-const getLoginPage = (req, res) => {
-  res.render('login', { errors: [], email: '' });
-};
-
-const getRegisterPage = (req, res) => {
-  res.render('register', { errors: [], name: '', email: '' });
->>>>>>> 8ea001e5f29de4580e1cc72074ac67489b007f56
 };
 
 // Modify your login function to handle both AJAX and traditional form submissions
