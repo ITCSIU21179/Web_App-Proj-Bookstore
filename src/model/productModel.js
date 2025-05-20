@@ -7,7 +7,8 @@ const getAllBooks = async () => {
       Books.title, 
       Books.price, 
       GROUP_CONCAT(DISTINCT Authors.name) AS author_names,
-      GROUP_CONCAT(DISTINCT Disciplines.name) AS discipline_names
+      GROUP_CONCAT(DISTINCT Disciplines.name) AS discipline_names,
+      Books.image_path
     FROM Books
     JOIN BookAuthors ON Books.book_id = BookAuthors.book_id
     JOIN Authors ON BookAuthors.author_id = Authors.author_id
