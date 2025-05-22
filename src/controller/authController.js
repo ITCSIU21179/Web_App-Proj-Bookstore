@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 const authModel = require('../model/authModel');
+const {getCartIdByCustomerId} = require('../model/productModel');
 
 // const getLoginPage = (req, res) => {
 //   res.render('login', { errors: [], email: '' });
@@ -32,22 +33,25 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     const user = await authModel.getUserByEmail(email);
     
+
     if (!user || !await bcrypt.compare(password, user.password_hash)) {
       // Authentication failed
       if (req.xhr || req.headers.accept.indexOf('json') > -1) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
-      return res.render('login', { 
-        errors: [{ msg: 'Invalid email or password' }], 
-        email 
-      });
+      // return res.render('login', { 
+      //   errors: [{ msg: 'Invalid email or password' }], 
+      //   email 
+      // });
     }
+    const cart = await getCartIdByCustomerId(user.customer_id);
     
     // Authentication successful
     req.session.user = {
       id: user.customer_id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      cart_id: cart.cart_id,
     };
     
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {
@@ -100,8 +104,8 @@ const register = async (req, res) => {
     const password_hash = await bcrypt.hash(password, salt);
     
     // Save user to database
-    await authModel.createUser(name, email, password_hash, phone, address);
-    
+    const customer_id = await authModel.createUser(name, email, password_hash, phone, address);
+    await authModel.createCart(customer_id);
     // Redirect to homepage or dashboard
     res.redirect('/homepage');
     

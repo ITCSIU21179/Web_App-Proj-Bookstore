@@ -22,7 +22,16 @@ const getUserByEmail = async (email) => {
   return rows.length > 0 ? rows[0] : null;
 };
 
+const createCart = async (user_id) => {
+  const [result] = await pool.execute(
+    'INSERT INTO Carts (customer_id) VALUES (?)',
+    [user_id]
+  );
+  return result.insertId;
+};
+
 module.exports = {
   createUser,
-  getUserByEmail
+  getUserByEmail,
+  createCart
 };

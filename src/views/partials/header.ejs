@@ -24,7 +24,7 @@
                 <div class="col-md-6">
                     <div class="right-element">
                         <a href="#" class="user-account for-buy"><i class="icon icon-user"></i><span>
-                                <%= isLoggedIn && typeof NameOfUser !== 'undefined' ? NameOfUser : 'Account' %>
+                                <%= isLoggedIn && typeof NameOfUser !=='undefined' ? NameOfUser : 'Account' %>
                             </span></a>
                         <a href="#" class="cart for-buy"><i class="icon icon-clipboard"></i><span>Cart:(0$)</span></a>
 
@@ -137,6 +137,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        updateCartTotal();
         const accountLink = document.querySelector('.user-account');
         const loginForm = document.getElementById('loginForm');
 
@@ -193,5 +194,34 @@
                     console.error('Login error:', error);
                 });
         });
+
+        function updateCartTotal() {
+            // Only proceed if user is logged in
+            const isLoggedIn = <%= (typeof isLoggedIn !== 'undefined' && isLoggedIn) ? 'true' : 'false' %>;
+            if (!isLoggedIn) return;
+
+            // Fetch updated cart info
+            fetch('/cart-info')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch cart data');
+                    }
+                    return response.json();
+                })
+                .then(cartItems => {
+                    // Calculate total cost
+                    let totalCost = 0;
+                    cartItems.forEach(item => {
+                        totalCost += item.quantity * item.price;
+                    });
+
+                    // Update cart display in header
+                    const cartElement = document.querySelector('.cart.for-buy span');
+                    cartElement.textContent = `Cart:(${totalCost.toFixed(2)}$)`;
+                })
+                .catch(error => {
+                    console.error('Error updating cart display:', error);
+                });
+        }
     });
 </script>

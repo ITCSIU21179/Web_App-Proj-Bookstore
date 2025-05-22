@@ -44,7 +44,13 @@ router.get('/logout', logout);
 
 // 2. Products data 
 router.get('/allbooks',getAllBooks);
+
 // User protected routes example
 router.get('/profile', isAuthenticated, getProfile);
 router.post('/edit-profile', isAuthenticated, editProfile);
+
+// 3. Cart data
+const { addBookToCart, getCartItems } = require('../controller/productController');
+router.post('/add-to-cart', isAuthenticated, addBookToCart);
+router.get('/cart-info', getCartItems);
 module.exports = router;
