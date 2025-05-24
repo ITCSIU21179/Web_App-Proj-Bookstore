@@ -31,6 +31,10 @@ const {
 // Body parser for form data
 router.use(express.urlencoded({ extended: true }));
 
+router.get('/', (req, res) => {
+  res.redirect('/homepage');
+});
+
 // UI routes
 router.get('/homepage', getHomepage);
 
