@@ -124,6 +124,10 @@
                         <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
                         <label class="form-check-label" for="rememberMe">Remember me</label>
                     </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="adminLogin" name="adminLogin">
+                        <label class="form-check-label" for="adminLogin">Login as Admin</label>
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">Login</button>
                 </form>
                 <div class="text-center mt-3">
@@ -209,6 +213,7 @@
 						// Hide after 3 seconds
 						setTimeout(() => {
 							notification.classList.remove('show');
+                            notification.remove();
 						}, 2000);
 					}
 
@@ -237,8 +242,10 @@
             e.preventDefault();
 
             const formData = new FormData(loginForm);
+            const isAdminLogin = formData.get('adminLogin') === 'on';
+            const loginEndpoint = isAdminLogin ? '/login-admin' : '/login';
 
-            fetch('/login', {
+            fetch(loginEndpoint, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -246,30 +253,35 @@
                 },
                 body: new URLSearchParams(formData)
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-
-                        window.location.reload(); // Reload page to update UI
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (isAdminLogin) {
+                        // For admin login, redirect to admin dashboard
+                        window.location.href = data.redirectUrl || '/admin-dashboard';
                     } else {
-                        // Show error messages
-                        const errorDiv = document.getElementById('loginErrors') ||
-                            document.createElement('div');
-                        errorDiv.id = 'loginErrors';
-                        errorDiv.className = 'alert alert-danger';
-                        errorDiv.innerHTML = data.errors ?
-                            data.errors.map(err => err.msg).join('<br>') :
-                            data.error || 'Login failed';
-
-                        const modalBody = document.querySelector('#loginModal .modal-body');
-                        if (!document.getElementById('loginErrors')) {
-                            modalBody.insertBefore(errorDiv, modalBody.firstChild);
-                        }
+                        // For regular user login, reload the page
+                        window.location.reload();
                     }
-                })
-                .catch(error => {
-                    console.error('Login error:', error);
-                });
+                } else {
+                    // Show error messages
+                    const errorDiv = document.getElementById('loginErrors') ||
+                        document.createElement('div');
+                    errorDiv.id = 'loginErrors';
+                    errorDiv.className = 'alert alert-danger';
+                    errorDiv.innerHTML = data.errors ?
+                        data.errors.map(err => err.msg).join('<br>') :
+                        data.error || 'Login failed';
+
+                    const modalBody = document.querySelector('#loginModal .modal-body');
+                    if (!document.getElementById('loginErrors')) {
+                        modalBody.insertBefore(errorDiv, modalBody.firstChild);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+            });
         });
 
 
