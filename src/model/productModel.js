@@ -30,14 +30,23 @@ const isItemInCart = async (cart_id, book_id) => {
   return rows;
 }
 
-const updateCartItemQuantity = async (cart_id, book_id, quantity) => {
+const updateCartItemQuantity = async (cart_id, item_id, quantity) => {
   const [result] = await pool.query(`
     UPDATE CartItems
     SET quantity = ?
-    WHERE cart_id = ? AND item_id = ?
-  `, [quantity, cart_id, book_id]);
+    WHERE cart_id = ? AND item_id = ?;
+  `, [quantity, cart_id, item_id]);
   return result.affectedRows;
 }
+
+// const updateCartItemQuantityByItemId = async (item_id, quantity) => {
+//   const [result] = await pool.query(`
+//     UPDATE CartItems 
+//     SET quantity = ?
+//     WHERE item_id = ?
+//   `, [quantity, item_id]);
+//   return result;
+// };
 
 const getCartIdByCustomerId = async (customer_id) => {
   const [rows] = await pool.query(`
@@ -46,7 +55,7 @@ const getCartIdByCustomerId = async (customer_id) => {
     FROM Carts
     WHERE Carts.customer_id = ?
   `, [customer_id]);
-  return rows;
+  return rows[0];
 }
 
 const addBookToCart = async (cart_id, book_id, quantity) => {
@@ -73,11 +82,21 @@ const getCartItems = async (cart_id) => {
   return rows;
 }
 
+const removeCartItem = async (item_id) => {
+  const [result] = await pool.query(`
+    DELETE FROM CartItems 
+    WHERE item_id = ?
+  `, [item_id]);
+  return result;
+};
+
 module.exports = {
   getAllBooks,
-  getCartIdByCustomerId,
   addBookToCart,
-  isItemInCart,
   getCartItems,
-  updateCartItemQuantity
+  isItemInCart,
+  getCartIdByCustomerId,
+  updateCartItemQuantity,
+  // updateCartItemQuantityByItemId,
+  removeCartItem
 };

@@ -45,7 +45,7 @@ const login = async (req, res) => {
       // });
     }
     const cart = await getCartIdByCustomerId(user.customer_id);
-    
+    console.log('cart:', cart.cart_id);
     // Authentication successful
     req.session.user = {
       id: user.customer_id,

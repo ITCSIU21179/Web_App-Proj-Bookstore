@@ -50,7 +50,10 @@ router.get('/profile', isAuthenticated, getProfile);
 router.post('/edit-profile', isAuthenticated, editProfile);
 
 // 3. Cart data
-const { addBookToCart, getCartItems } = require('../controller/productController');
+const { addBookToCart, getCartItems, updateCartItems, removeFromCart, checkout } = require('../controller/productController');
 router.post('/add-to-cart', isAuthenticated, addBookToCart);
 router.get('/cart-info', getCartItems);
+router.post('/update-cart', isAuthenticated, updateCartItems);
+router.post('/remove-from-cart', isAuthenticated, removeFromCart);
+router.get('/checkout', isAuthenticated, checkout);
 module.exports = router;

@@ -135,7 +135,84 @@
     </div>
 </div>
 
+<!-- After the login modal -->
+<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cartModalLabel">Your Shopping Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="cart-items-container">
+                    <!-- Cart items will be loaded here dynamically -->
+                    <div class="text-center">Loading your cart...</div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <div class="cart-total">Total: $<span id="cart-modal-total">0.00</span></div>
+                <div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="update-cart-button">Update Cart</button>
+                    <button type="button" class="btn btn-accent" id="checkout-button">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    window.updateCartTotal = function () {
+        // Only proceed if user is logged in
+        const isLoggedIn = <%= (typeof isLoggedIn !== 'undefined' && isLoggedIn) ? 'true' : 'false' %>;
+        if (!isLoggedIn) return;
+
+        // Fetch updated cart info
+        fetch('/cart-info')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch cart data');
+                }
+                return response.json();
+            })
+            .then(cartItems => {
+                // Calculate total cost
+                let totalCost = 0;
+                cartItems.forEach(item => {
+                    totalCost += item.quantity * item.price;
+                });
+
+                // Update cart display in header
+                const cartElement = document.querySelector('.cart.for-buy span');
+                cartElement.textContent = `Cart:(${totalCost.toFixed(2)}$)`;
+            })
+            .catch(error => {
+                console.error('Error updating cart display:', error);
+            });
+    };
+    window.showNotification = function (message, type = 'success') {
+						// Create notification element if it doesn't exist
+						let notification = document.querySelector('.cart-notification');
+						if (!notification) {
+							notification = document.createElement('div');
+							notification.className = 'cart-notification';
+							document.querySelector('#header').appendChild(notification);
+						}
+
+						// Set message and type
+						notification.textContent = message;
+						notification.className = `cart-notification ${type}`;
+
+						// Show notification
+						notification.classList.add('show');
+
+						// Hide after 3 seconds
+						setTimeout(() => {
+							notification.classList.remove('show');
+						}, 2000);
+					}
+
+
     document.addEventListener('DOMContentLoaded', function () {
         updateCartTotal();
         const accountLink = document.querySelector('.user-account');
@@ -195,12 +272,33 @@
                 });
         });
 
-        function updateCartTotal() {
-            // Only proceed if user is logged in
-            const isLoggedIn = <%= (typeof isLoggedIn !== 'undefined' && isLoggedIn) ? 'true' : 'false' %>;
-            if (!isLoggedIn) return;
 
-            // Fetch updated cart info
+
+        // Add cart click handler
+        const cartElement = document.querySelector('.cart.for-buy');
+        if (cartElement) {
+            cartElement.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Check if user is logged in
+                const isLoggedIn = <%= (typeof isLoggedIn !== 'undefined' && isLoggedIn) ? 'true' : 'false' %>;
+                if (!isLoggedIn) {
+                    alert('Please log in to view your cart');
+                    return;
+                }
+
+                // Load cart items and show modal
+                loadCartItems();
+                const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+                cartModal.show();
+            });
+        }
+
+        // Function to load cart items into the modal
+        function loadCartItems() {
+            const cartContainer = document.getElementById('cart-items-container');
+            cartContainer.innerHTML = '<div class="text-center">Loading your cart...</div>';
+
             fetch('/cart-info')
                 .then(response => {
                     if (!response.ok) {
@@ -209,19 +307,176 @@
                     return response.json();
                 })
                 .then(cartItems => {
-                    // Calculate total cost
+                    // Calculate total
                     let totalCost = 0;
+
+                    if (cartItems.length === 0) {
+                        cartContainer.innerHTML = '<div class="text-center">Your cart is empty</div>';
+                        document.getElementById('cart-modal-total').textContent = '0.00';
+                        document.getElementById('update-cart-button').disabled = true;
+                        document.getElementById('checkout-button').disabled = true;
+                        return;
+                    }
+
+                    // Generate HTML for cart items
+                    let cartHtml = '<div class="cart-items-list">';
+
                     cartItems.forEach(item => {
-                        totalCost += item.quantity * item.price;
+                        const itemTotal = item.quantity * item.price;
+                        totalCost += itemTotal;
+
+                        cartHtml += `
+                        <div class="cart-item" data-item-id="${item.item_id}">
+                            <div class="row align-items-center mb-3 p-2 border-bottom">
+                                <div class="col-md-2">
+                                    <img src="images/${item.image_path || 'tab-item1.jpg'}" alt="${item.title}" class="img-fluid">
+                                </div>
+                                <div class="col-md-5">
+                                    <h5>${item.title}</h5>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control form-control-sm text-center item-quantity" value="${item.quantity}" min="1" max="10">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="item-price">$${item.price} x ${item.quantity}</div>
+                                    <div class="item-total">$${itemTotal.toFixed(2)}</div>
+                                </div>
+                                <div class="col-md-1">
+                                    <button class="btn btn-sm btn-danger remove-item"><p>Remove</p></button>
+                                </div>
+                            </div>
+                        </div>`;
                     });
 
-                    // Update cart display in header
-                    const cartElement = document.querySelector('.cart.for-buy span');
-                    cartElement.textContent = `Cart:(${totalCost.toFixed(2)}$)`;
+                    cartHtml += '</div>';
+                    cartContainer.innerHTML = cartHtml;
+                    document.getElementById('cart-modal-total').textContent = totalCost.toFixed(2);
+
+                    // Add event listeners for quantity buttons
+                    setupQuantityButtons();
                 })
                 .catch(error => {
-                    console.error('Error updating cart display:', error);
+                    console.error('Error loading cart items:', error);
+                    cartContainer.innerHTML = '<div class="text-center text-danger">Error loading cart items</div>';
                 });
         }
+
+        // Function to setup quantity adjustment buttons
+        function setupQuantityButtons() {
+
+            // Direct input change
+            document.querySelectorAll('.item-quantity').forEach(input => {
+                input.addEventListener('change', function () {
+                    if (parseInt(this.value) < 1) this.value = 1;
+                    if (parseInt(this.value) > 10) this.value = 10;
+                    updateItemPrice(this);
+                });
+            });
+
+            // Remove item
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.addEventListener('click', function () {
+                    const cartItem = this.closest('.cart-item');
+                    const itemId = cartItem.dataset.itemId;
+
+                    if (confirm('Are you sure you want to remove this item from your cart?')) {
+                        fetch('/remove-from-cart', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ item_id: parseInt(itemId) })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                cartItem.remove();
+                                updateCartTotal();
+                                updateCartModalTotal();
+
+                                // Check if cart is now empty
+                                if (document.querySelectorAll('.cart-item').length === 0) {
+                                    document.getElementById('cart-items-container').innerHTML =
+                                        '<div class="text-center">Your cart is empty</div>';
+                                    document.getElementById('update-cart-button').disabled = true;
+                                    document.getElementById('checkout-button').disabled = true;
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Error removing item:', err);
+                            });
+                    }
+                });
+            });
+        }
+
+        // Function to update price display when quantity changes
+        function updateItemPrice(element) {
+            const cartItem = element.closest('.cart-item');
+            const quantityInput = cartItem.querySelector('.item-quantity');
+            const quantity = parseInt(quantityInput.value);
+
+            const itemPriceElement = cartItem.querySelector('.item-price');
+            const priceText = itemPriceElement.textContent;
+            const price = parseFloat(priceText.split('$')[1].split(' x ')[0]);
+
+            const itemTotal = price * quantity;
+            cartItem.querySelector('.item-total').textContent = '$' + itemTotal.toFixed(2);
+
+            updateCartModalTotal();
+        }
+
+        // Function to update total in the modal
+        function updateCartModalTotal() {
+            let total = 0;
+            document.querySelectorAll('.cart-item').forEach(item => {
+                const totalText = item.querySelector('.item-total').textContent;
+                total += parseFloat(totalText.substring(1));
+            });
+
+            document.getElementById('cart-modal-total').textContent = total.toFixed(2);
+        }
+
+        // Update cart button
+        document.getElementById('update-cart-button').addEventListener('click', function () {
+            const updates = [];
+
+            document.querySelectorAll('.cart-item').forEach(item => {
+                const itemId = parseInt(item.dataset.itemId);
+                const quantity = parseInt(item.querySelector('.item-quantity').value);
+
+                updates.push({
+                    item_id: itemId,
+                    quantity: quantity
+                });
+            });
+
+            fetch('/update-cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ updates })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Update cart icon total
+                    updateCartTotal();
+                    showNotification('Cart updated successfully!');
+
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('cartModal')).hide();
+                })
+                .catch(err => {
+                    console.error('Error updating cart:', err);
+                    showNotification('Failed to update cart. Please try again.', 'error');
+                });
+        });
+
+        // Checkout button
+        document.getElementById('checkout-button').addEventListener('click', function () {
+            window.location.href = '/checkout';
+        });
     });
 </script>
