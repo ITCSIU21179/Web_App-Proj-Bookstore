@@ -3,7 +3,6 @@ const express = require('express');
 const session = require('express-session');
 const app = express();
 const port = process.env.PORT || 3000;
-const hostname = process.env.HOST_NAME || 'localhost';
 const webRoutes = require('./src/route/webRoute');
 
 const configViewEngine = require('./src/config/viewEngine');
@@ -38,6 +37,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/', webRoutes);
 
 // Start server
-app.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+app.listen(port, () => {
+  console.log(`Server running at port: ${port}/`);
 });
