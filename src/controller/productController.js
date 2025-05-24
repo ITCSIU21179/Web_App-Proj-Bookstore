@@ -22,16 +22,16 @@ const addBookToCart = async (req, res) => {
     }
     
     // Check if the book already exists in the cart
-    const isItemInCart = await productModel.isItemInCart(cart[0].cart_id, book_id);
+    const isItemInCart = await productModel.isItemInCart(cart.cart_id, book_id);
     if (isItemInCart && isItemInCart.length > 0) {
       // Update quantity if item already exists in cart
       const updatedQuantity = isItemInCart[0].quantity + quantity;
-      await productModel.updateCartItemQuantity(cart[0].cart_id, book_id, updatedQuantity);
+      await productModel.updateCartItemQuantity(cart.cart_id, book_id, updatedQuantity);
       return res.status(200).json({ message: 'Book quantity updated in cart' });
     }
 
     // Add book to cart
-    const result = await productModel.addBookToCart(cart[0].cart_id, book_id, quantity);
+    const result = await productModel.addBookToCart(cart.cart_id, book_id, quantity);
     res.status(200).json({ message: 'Book added to cart', itemId: result });
   } catch (error) {
     console.error('Error adding book to cart:', error);
