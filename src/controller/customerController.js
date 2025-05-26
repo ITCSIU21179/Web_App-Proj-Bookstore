@@ -9,21 +9,21 @@ const getProfile = async (req, res) => {
     const customer = await customerModel.getCustomerById(customerId);
     
     // Fetch order history
-    // const orders = await customerModel.getCustomerOrders(customerId);
+    const orders = await customerModel.getCustomerOrders(customerId);
     
-    // if (!customer) {
-    //   return res.status(404).render('error', { 
-    //     isLoggedIn: true, 
-    //     message: 'Customer profile not found' 
-    //   });
-    // }
+    if (!customer) {
+      return res.status(404).render('error', { 
+        isLoggedIn: true, 
+        message: 'Customer profile not found' 
+      });
+    }
     
     // Render profile page with customer data
     res.render('profile', { 
       // isLoggedIn: true,
       NameOfUser: customer.name,
-      customer
-    //   orders
+      customer,
+      orders
     });
     
   } catch (error) {

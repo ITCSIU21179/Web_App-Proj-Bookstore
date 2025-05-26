@@ -62,7 +62,7 @@ const addBookToCart = async (cart_id, book_id, quantity) => {
   const [result] = await pool.query(`
     INSERT INTO CartItems (cart_id, item_id, item_type, quantity)
     VALUES (?, ?, ?, ?)
-  `, [cart_id, book_id, 'book', quantity] 
+  `, [cart_id, book_id, 'book', quantity]
   );
   return result.insertId;
 }
@@ -90,6 +90,72 @@ const removeCartItem = async (item_id) => {
   return result;
 };
 
+
+
+const createNewOrder = async (customer_id, cartItems) => {
+  // Get connection from pool for transaction
+  const connection = await pool.getConnection();
+  
+  try {
+    // Start transaction
+    await connection.beginTransaction();
+    
+    // Calculate total order amount
+    let totalAmount = 0;
+    cartItems.forEach(item => {
+      totalAmount += item.price * item.quantity;
+    });
+    
+    // Create new order
+    const [orderResult] = await connection.query(
+      `INSERT INTO Orders (customer_id, status, total_amount) 
+       VALUES (?, 'pending', ?)`,
+      [customer_id, totalAmount]
+    );
+    
+    const orderId = orderResult.insertId;
+    
+    // Insert order items
+    for (const item of cartItems) {
+      await connection.query(
+        `INSERT INTO OrderItems (order_id, item_type, item_id, quantity, price_at_order) 
+         VALUES (?, ?, ?, ?, ?)`,
+        [orderId, 'book', item.item_id, item.quantity, item.price]
+      );
+    }
+    
+    // Release cart items
+    await releaseCartItems(cartItems[0].cart_id);
+    
+    // Commit the transaction
+    await connection.commit();
+    
+    // Return the new order ID and total
+    return {
+      order_id: orderId,
+      total_amount: totalAmount,
+      status: 'pending'
+    };
+    
+  } catch (error) {
+    // If error occurs, roll back changes
+    await connection.rollback();
+    console.error('Error creating new order:', error);
+    throw error;
+  } finally {
+    // Release connection back to pool
+    connection.release();
+  }
+};
+
+const releaseCartItems = async (cart_id) => {
+  const [result] = await pool.query(`
+    DELETE FROM CartItems 
+    WHERE cart_id = ?
+  `, [cart_id]);
+  return result;
+};
+
 module.exports = {
   getAllBooks,
   addBookToCart,
@@ -98,5 +164,6 @@ module.exports = {
   getCartIdByCustomerId,
   updateCartItemQuantity,
   // updateCartItemQuantityByItemId,
-  removeCartItem
+  removeCartItem,
+  createNewOrder
 };
