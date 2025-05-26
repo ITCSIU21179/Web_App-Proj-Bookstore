@@ -356,7 +356,7 @@
                                             <td>
                                                 <%= new Date(order.order_date).toLocaleDateString() %>
                                             </td>
-                                            <td>$<%= order.total_amount.toFixed(2) %>
+                                            <td>$<%= order.total_amount %>
                                             </td>
                                             <td>
                                                 <% if(order.status==='Delivered' ) { %>
@@ -366,7 +366,7 @@
                                                         <% } else if(order.status==='Shipped' ) { %>
                                                             <span class="badge badge-shipped">Shipped</span>
                                                             <% } else { %>
-                                                                <span class="badge">
+                                                                <span class="badge" style="<% if (order.status==='pending'){ %>color:#f10505;<% } else if (order.status==='paid'){ %>color:green;<% } %>">
                                                                     <%= order.status %>
                                                                 </span>
                                                                 <% } %>
