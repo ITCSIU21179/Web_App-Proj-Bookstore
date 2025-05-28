@@ -45,8 +45,8 @@ const confirmPayment = async (orderId) => {
         // Start transaction
         await connection.beginTransaction();
 
-        const [result] = await connection.execute(
-            UPDATE Orders SET status = 'paid' WHERE order_id = ?,
+        const [result] = await connection.execute(`
+            UPDATE Orders SET status = 'paid' WHERE order_id = ?`,
             [orderId]
         );
         if (result.affectedRows === 0) {
@@ -71,13 +71,13 @@ const confirmPayment = async (orderId) => {
 }
 
 const reduceStock = async (connection, orderId) => {
-    const [rows] = await connection.execute(
-        SELECT item_id, quantity FROM OrderItems WHERE order_id = ?,
+    const [rows] = await connection.execute(`
+        SELECT item_id, quantity FROM OrderItems WHERE order_id = ?`,
         [orderId]
     );
     for (const item of rows) {
-        await connection.execute(
-            UPDATE Books SET stock_quantity = stock_quantity - ? WHERE book_id = ?,
+        await connection.execute(`
+            UPDATE Books SET stock_quantity = stock_quantity - ? WHERE book_id = ?`,
             [item.quantity, item.item_id]
         );
     }
