@@ -92,17 +92,12 @@ const processCheckout = async (req, res) => {
     }
 
     // Create new order
-    const orderResult = await productModel.createNewOrder(customerId, cartItems);
+    const orderResult = await productModel.createNewOrder(customerId, cartItems, cart_id);
+    if (!orderResult || !orderResult.order_id) {
+      return res.status(500).json({ error: 'Failed to create order' });
+    }
 
-    // Clear cart after successful order
-    // This would be another function you'd need to implement
-    // await productModel.clearCart(cart_id);
-
-    res.status(200).json({
-      success: true,
-      message: 'Order created successfully',
-      order: orderResult
-    });
+    res.redirect('/profile');
 
   } catch (error) {
     console.error('Error processing checkout:', error);

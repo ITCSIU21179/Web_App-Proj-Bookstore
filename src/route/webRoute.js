@@ -15,7 +15,8 @@ const {
 const {getAllBooks} = require('../controller/productController');
 const { 
   getProfile,
-  editProfile 
+  editProfile,
+  getOrderItems 
 } = require('../controller/customerController');
 
 const { 
@@ -45,12 +46,15 @@ router.get('/logout', logout);
 
 // 2. Products data 
 router.get('/allbooks',getAllBooks);
+// router.get('/book/:id', getBookById);
 
-// User protected routes example
+
+// 3. User protected routes 
 router.get('/profile', isAuthenticated, getProfile);
 router.post('/edit-profile', isAuthenticated, editProfile);
+router.get('/order/:orderId', isAuthenticated, getOrderItems);
 
-// 3. Cart data
+// 4. Cart data
 const { addBookToCart, getCartItems, updateCartItems, removeFromCart, checkoutPage, processCheckout } = require('../controller/productController');
 router.post('/add-to-cart', isAuthenticated, addBookToCart);
 router.get('/cart-info', getCartItems);
@@ -59,8 +63,8 @@ router.post('/remove-from-cart', isAuthenticated, removeFromCart);
 router.get('/checkout', isAuthenticated, checkoutPage);
 router.get('/processCheckout', isAuthenticated, processCheckout);
 
-// 4.admin routes
-const {registerAdmin, login_admin, getAdminDashboard, getAllUsers, getAllOrdersWithStatus, confirmPayment } = require('../controller/adminController');
+// 5.admin routes
+const {registerAdmin, login_admin, getAdminDashboard, getAllUsers, getAllOrdersWithStatus, confirmPayment, getOrderDetails } = require('../controller/adminController');
 // router.get('/admin/login', isNotAuthenticated, login_admin);
 router.post('/admin/register', registerValidationRules, registerAdmin);
 router.post('/admin/login', loginValidationRules, login_admin);
@@ -68,6 +72,7 @@ router.get('/admin/dashboard', isAdminAuthenticated, getAdminDashboard);
 // router.get('/admin/users', isAuthenticated, getAllUsers);
 router.get('/admin/orders', isAdminAuthenticated, getAllOrdersWithStatus);
 router.get('/admin/confirm-payment', isAdminAuthenticated, confirmPayment);
+router.get('/admin/order-details', isAdminAuthenticated, getOrderDetails);
 
 
 module.exports = router;

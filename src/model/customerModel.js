@@ -42,8 +42,19 @@ const updateCustomer = async (customerId, updatedData) => {
   return getCustomerById(customerId);
 }
 
+const getOrderItems = async (orderId) => {
+  const [rows] = await pool.execute(
+    `SELECT oi.item_id, oi.quantity, b.title, b.price, b.image_path 
+     FROM OrderItems oi 
+     JOIN Books b ON oi.item_id = b.book_id 
+     WHERE oi.order_id = ?`,
+    [orderId]
+  );
+  return rows;
+};
 module.exports = {
   getCustomerById,
   getCustomerOrders,
-  updateCustomer
+  updateCustomer,
+  getOrderItems
 };

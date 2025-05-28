@@ -181,6 +181,48 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .view-order-btn {
+            background: #fb9678;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .view-order-btn:hover {
+            background: #f37e5c;
+            color: white;
+        }
+
+        .order-items-list {
+            margin-bottom: 20px;
+        }
+
+        .order-items-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-items-list th,
+        .order-items-list td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-items-list th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+
+        .order-total {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 
@@ -233,6 +275,27 @@
     <!-- Notification div -->
     <div id="notification" class="notification"></div>
 
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="order-details-container">
+                        <div class="text-center">Loading order details...</div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <div class="order-total">Total: $<span id="order-modal-total">0.00</span></div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/jquery-1.11.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
@@ -241,7 +304,13 @@
     <script src="js/script.js"></script>
 
     <script>
+        // Initialize modal
+        let orderDetailsModal;
+
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize the modal
+            orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            
             // Fetch both pending and paid orders when page loads
             fetchOrders('pending');
             fetchOrders('paid');
@@ -282,6 +351,7 @@
                                     <th>Date</th>
                                     <th>Status</th>
                                     ${status === 'pending' ? '<th>Actions</th>' : ''}
+                                    <th>Details</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -311,7 +381,12 @@
                             `;
                         }
                         
-                        html += `</tr>`;
+                        // Add View button for all orders
+                        html += `
+                            <td>
+                                <button class="view-order-btn" onclick="viewOrderDetails(${order.order_id})">View</button>
+                            </td>
+                        </tr>`;
                     });
                     
                     html += `
@@ -353,6 +428,87 @@
                 .catch(error => {
                     console.error('Error confirming payment:', error);
                     showNotification('Failed to confirm payment', 'error');
+                });
+        }
+
+        function viewOrderDetails(orderId) {
+            // Update modal title
+            document.getElementById('orderDetailsModalLabel').textContent = `Order #${orderId} Details`;
+            
+            // Show modal
+            orderDetailsModal.show();
+            
+            // Load order details
+            const orderContainer = document.getElementById('order-details-container');
+            orderContainer.innerHTML = '<div class="text-center">Loading order details...</div>';
+            
+            fetch(`/admin/order-details?order_id=${orderId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch order details');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.orderItems || data.orderItems.length === 0) {
+                        orderContainer.innerHTML = '<div class="text-center">No items found for this order</div>';
+                        document.getElementById('order-modal-total').textContent = '0.00';
+                        return;
+                    }
+                    
+                    const orderItems = data.orderItems;
+                    
+                    // Calculate total cost
+                    let totalCost = 0;
+                    orderItems.forEach(item => {
+                        totalCost += item.quantity * item.price;
+                    });
+                    
+                    // Generate HTML for order items
+                    let orderItemsHtml = `
+                        <div class="order-items-list">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Title</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    orderItems.forEach(item => {
+                        const itemTotal = item.quantity * item.price;
+                        
+                        orderItemsHtml += `
+                            <tr>
+                                <td>
+                                    <img src="/images/${item.image_path || 'tab-item1.jpg'}" alt="${item.title}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                </td>
+                                <td>${item.title}</td>
+                                <td>$${parseFloat(item.price).toFixed(2)}</td>
+                                <td>${item.quantity}</td>
+                                <td>$${itemTotal.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    orderItemsHtml += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    
+                    orderContainer.innerHTML = orderItemsHtml;
+                    document.getElementById('order-modal-total').textContent = totalCost.toFixed(2);
+                })
+                .catch(error => {
+                    console.error('Error loading order details:', error);
+                    orderContainer.innerHTML = '<div class="text-center text-danger">Error loading order details</div>';
+                    showNotification('Failed to load order details', 'error');
                 });
         }
 
