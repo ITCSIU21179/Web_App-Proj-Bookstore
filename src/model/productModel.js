@@ -95,26 +95,26 @@ const removeCartItem = async (item_id) => {
 const createNewOrder = async (customer_id, cartItems) => {
   // Get connection from pool for transaction
   const connection = await pool.getConnection();
-  
+
   try {
     // Start transaction
     await connection.beginTransaction();
-    
+
     // Calculate total order amount
     let totalAmount = 0;
     cartItems.forEach(item => {
       totalAmount += item.price * item.quantity;
     });
-    
+
     // Create new order
     const [orderResult] = await connection.query(
       `INSERT INTO Orders (customer_id, status, total_amount) 
        VALUES (?, 'pending', ?)`,
       [customer_id, totalAmount]
     );
-    
+
     const orderId = orderResult.insertId;
-    
+
     // Insert order items
     for (const item of cartItems) {
       await connection.query(
@@ -123,20 +123,20 @@ const createNewOrder = async (customer_id, cartItems) => {
         [orderId, 'book', item.item_id, item.quantity, item.price]
       );
     }
-    
+
     // Release cart items
     await releaseCartItems(cartItems[0].cart_id);
-    
+
     // Commit the transaction
     await connection.commit();
-    
+
     // Return the new order ID and total
     return {
       order_id: orderId,
       total_amount: totalAmount,
       status: 'pending'
     };
-    
+
   } catch (error) {
     // If error occurs, roll back changes
     await connection.rollback();

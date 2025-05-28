@@ -9,7 +9,7 @@ const {
   getRegisterPage, 
   login, 
   register, 
-  logout 
+  logout
 } = require('../controller/authController');
 
 const {getAllBooks} = require('../controller/productController');
@@ -25,7 +25,8 @@ const {
 
 const { 
   isAuthenticated, 
-  isNotAuthenticated 
+  isNotAuthenticated,
+  isAdminAuthenticated 
 } = require('../middleware/authMiddleware');
 
 // Body parser for form data
@@ -59,4 +60,14 @@ router.get('/checkout', isAuthenticated, checkoutPage);
 router.get('/processCheckout', isAuthenticated, processCheckout);
 
 // 4.admin routes
+const {registerAdmin, login_admin, getAdminDashboard, getAllUsers, getAllOrdersWithStatus, confirmPayment } = require('../controller/adminController');
+// router.get('/admin/login', isNotAuthenticated, login_admin);
+router.post('/admin/register', registerValidationRules, registerAdmin);
+router.post('/admin/login', loginValidationRules, login_admin);
+router.get('/admin/dashboard', isAdminAuthenticated, getAdminDashboard);
+// router.get('/admin/users', isAuthenticated, getAllUsers);
+router.get('/admin/orders', isAdminAuthenticated, getAllOrdersWithStatus);
+router.get('/admin/confirm-payment', isAdminAuthenticated, confirmPayment);
+
+
 module.exports = router;
