@@ -13,7 +13,15 @@ const isNotAuthenticated = (req, res, next) => {
   res.redirect('/homepage');
 };
 
+const isAdminAuthenticated = (req, res, next) => {
+  if (req.session && req.session.admin) {
+    return next();
+  }
+  res.redirect('/homepage');
+}
+
 module.exports = {
   isAuthenticated,
-  isNotAuthenticated
+  isNotAuthenticated, 
+  isAdminAuthenticated
 };
