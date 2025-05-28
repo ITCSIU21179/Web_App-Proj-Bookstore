@@ -262,11 +262,11 @@
 
 						<ul class="tabs">
 							<li data-tab-target="#all-genre" class="active tab">All Genre</li>
-							<li data-tab-target="#business" class="tab">Business</li>
-							<li data-tab-target="#technology" class="tab">Technology</li>
-							<li data-tab-target="#romantic" class="tab">Romantic</li>
+							<li data-tab-target="#fiction" class="tab">Fiction</li>
+							<li data-tab-target="#self-help" class="tab">Self-help</li>
+							<li data-tab-target="#philosophy" class="tab">Phylosophy</li>
 							<li data-tab-target="#adventure" class="tab">Adventure</li>
-							<li data-tab-target="#fictional" class="tab">Fictional</li>
+							<li data-tab-target="#history" class="tab">History</li>
 						</ul>
 
 						<div class="tab-content">
@@ -407,7 +407,7 @@
 								</div>
 
 							</div>
-							<div id="business" data-tab-content>
+							<div id="fiction" data-tab-content>
 								<div class="row">
 									<div class="col-md-3">
 										<div class="product-item">
@@ -476,7 +476,7 @@
 								</div>
 							</div>
 
-							<div id="technology" data-tab-content>
+							<div id="self-help" data-tab-content>
 								<div class="row">
 									<div class="col-md-3">
 										<div class="product-item">
@@ -544,7 +544,7 @@
 								</div>
 							</div>
 
-							<div id="romantic" data-tab-content>
+							<div id="philosophy" data-tab-content>
 								<div class="row">
 									<div class="col-md-3">
 										<div class="product-item">
@@ -648,7 +648,7 @@
 								</div>
 							</div>
 
-							<div id="fictional" data-tab-content>
+							<div id="history" data-tab-content>
 								<div class="row">
 									<div class="col-md-3">
 										<div class="product-item">
@@ -1047,7 +1047,7 @@
 			<script src="js/plugins.js"></script>
 			<script src="js/script.js"></script>
 
-			<!-- Add this before closing </body> tag -->
+			
 			<script>
 				document.addEventListener('DOMContentLoaded', function () {
 					updateCartTotal();
@@ -1126,7 +1126,7 @@
 									const disciplines = book.discipline_names.toLowerCase().split(',').map(d => d.trim());
 									return disciplines.includes(tabId);
 								});
-
+								console.log(`Books for ${tabId}:`, genreBooks);
 								// Populate the selected tab with filtered books
 								populateGenreTab(tabId, genreBooks);
 							});

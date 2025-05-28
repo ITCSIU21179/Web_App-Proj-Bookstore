@@ -92,7 +92,7 @@ const removeCartItem = async (item_id) => {
 
 
 
-const createNewOrder = async (customer_id, cartItems) => {
+const createNewOrder = async (customer_id, cartItems, cart_id) => {
   // Get connection from pool for transaction
   const connection = await pool.getConnection();
 
@@ -125,7 +125,7 @@ const createNewOrder = async (customer_id, cartItems) => {
     }
 
     // Release cart items
-    await releaseCartItems(cartItems[0].cart_id);
+    await releaseCartItems( connection, cart_id);
 
     // Commit the transaction
     await connection.commit();
@@ -148,8 +148,8 @@ const createNewOrder = async (customer_id, cartItems) => {
   }
 };
 
-const releaseCartItems = async (cart_id) => {
-  const [result] = await pool.query(`
+const releaseCartItems = async (connection, cart_id) => {
+  const [result] = await connection.query(`
     DELETE FROM CartItems 
     WHERE cart_id = ?
   `, [cart_id]);

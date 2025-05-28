@@ -68,8 +68,35 @@ const editProfile = async (req, res) => {
       message: 'Error updating profile' 
     });
   }
-}
+};
+
+const getOrderItems = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const orderDetails = await customerModel.getOrderItems(orderId);
+    
+    if (!orderDetails) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      orderDetails
+    });
+    
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).render('error', { 
+      // isLoggedIn: true,
+      message: 'Error fetching order details' 
+    });
+  }
+};
 module.exports = {
   getProfile,
-  editProfile
+  editProfile,
+  getOrderItems
 };

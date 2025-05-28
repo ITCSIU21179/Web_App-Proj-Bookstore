@@ -144,10 +144,33 @@ const confirmPayment = async (req, res) => {
   }
 };
 
+const getOrderDetails = async (req, res) => {
+  try {
+    if (!req.session.admin) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const orderId = req.query.order_id;
+    const orderItems = await adminModel.getOrderItems(orderId);
+    
+    res.status(200).json({
+      success: true,
+      orderItems: orderItems
+    });
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch order details'
+    });
+  }
+};
+
 module.exports = {
   login_admin,
   getAdminDashboard,
   registerAdmin,
   getAllOrdersWithStatus,
-  confirmPayment
+  confirmPayment,
+  getOrderDetails
 };

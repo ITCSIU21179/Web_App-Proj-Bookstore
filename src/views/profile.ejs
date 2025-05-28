@@ -231,6 +231,48 @@
             margin-top: -10px;
             margin-bottom: 10px;
         }
+
+        .order-items-list {
+            margin-bottom: 20px;
+        }
+
+        .order-items-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-items-list th,
+        .order-items-list td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-items-list th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+
+        .view-order-btn {
+            background: #fb9678;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .view-order-btn:hover {
+            background: #f37e5c;
+            color: white;
+        }
+
+        .order-total {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 
@@ -349,33 +391,36 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% orders.forEach(function(order) { %>
-                                        <tr>
-                                            <td>#<%= order.order_id %>
-                                            </td>
-                                            <td>
-                                                <%= new Date(order.order_date).toLocaleDateString() %>
-                                            </td>
-                                            <td>$<%= order.total_amount %>
-                                            </td>
-                                            <td>
-                                                <% if(order.status==='Delivered' ) { %>
-                                                    <span class="badge badge-delivered">Delivered</span>
-                                                    <% } else if(order.status==='Processing' ) { %>
-                                                        <span class="badge badge-processing">Processing</span>
-                                                        <% } else if(order.status==='Shipped' ) { %>
-                                                            <span class="badge badge-shipped">Shipped</span>
-                                                            <% } else { %>
-                                                                <span class="badge" style="<% if (order.status==='pending'){ %>color:#f10505;<% } else if (order.status==='paid'){ %>color:green;<% } %>">
-                                                                    <%= order.status %>
-                                                                </span>
-                                                                <% } %>
-                                            </td>
-                                            <td>
-                                                <a href="/order/<%= order.order_id %>" class="btn btn-sm">View</a>
-                                            </td>
-                                        </tr>
-                                        <% }); %>
+                                    <% let orderCounter=1; %>
+                                        <% orders.forEach(function(order) { %>
+                                            <tr>
+                                                <td>#<%= orderCounter++ %>
+                                                </td>
+                                                <td>
+                                                    <%= new Date(order.order_date).toLocaleDateString() %>
+                                                </td>
+                                                <td>$<%= order.total_amount %>
+                                                </td>
+                                                <td>
+                                                    <% if(order.status==='Delivered' ) { %>
+                                                        <span class="badge badge-delivered">Delivered</span>
+                                                        <% } else if(order.status==='Processing' ) { %>
+                                                            <span class="badge badge-processing">Processing</span>
+                                                            <% } else if(order.status==='Shipped' ) { %>
+                                                                <span class="badge badge-shipped">Shipped</span>
+                                                                <% } else { %>
+                                                                    <span class="badge"
+                                                                        style="<% if (order.status==='pending'){ %>color:#f10505;<% } else if (order.status==='paid'){ %>color:green;<% } %>">
+                                                                        <%= order.status %>
+                                                                    </span>
+                                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm view-order-btn"
+                                                        data-order-id="<%= order.order_id %>">View</button>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
                                 </tbody>
                             </table>
                         </div>
@@ -388,6 +433,28 @@
                 </div>
             </div>
         </section>
+
+        <!-- Order Details Modal -->
+        <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="order-details-container">
+                            <div class="text-center">Loading order details...</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <div class="order-total">Total: $<span id="order-modal-total">0.00</span></div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <%- include('partials/footer') %>
 
@@ -405,7 +472,9 @@
                     const editProfile = document.getElementById('edit-profile');
                     const viewModeText = document.getElementById('view-mode-text');
                     const editModeText = document.getElementById('edit-mode-text');
-
+                    const viewOrderButtons = document.querySelectorAll('.view-order-btn');
+                    const orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+                    
                     // Toggle between view and edit mode
                     profileToggle.addEventListener('change', function () {
                         if (this.checked) {
@@ -424,6 +493,95 @@
                     // Initialize view mode
                     viewModeText.style.color = '#fb9678';
                     editModeText.style.color = '#777';
+
+
+                    viewOrderButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            const orderId = this.getAttribute('data-order-id');
+
+                            // Update modal title with order ID
+                            document.getElementById('orderDetailsModalLabel').textContent = `Order Details`;
+
+                            // Show the modal
+                            orderDetailsModal.show();
+
+                            // Load order details
+                            loadOrderDetails(orderId);
+                        });
+                    });
+
+                    function loadOrderDetails(orderId) {
+                        const orderContainer = document.getElementById('order-details-container');
+                        orderContainer.innerHTML = '<div class="text-center">Loading order details...</div>';
+
+                        fetch(`/order/${orderId}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Failed to fetch order details');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (!data.success || !data.orderDetails || data.orderDetails.length === 0) {
+                                    orderContainer.innerHTML = '<div class="text-center">No items found for this order</div>';
+                                    document.getElementById('order-modal-total').textContent = '0.00';
+                                    return;
+                                }
+
+                                const orderDetails = data.orderDetails;
+
+                                // Calculate total cost
+                                let totalCost = 0;
+                                orderDetails.forEach(item => {
+                                    totalCost += item.quantity * item.price;
+                                });
+
+                                // Generate HTML for order items
+                                let orderItemsHtml = `
+                <div class="order-items-list">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Title</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+                                orderDetails.forEach(item => {
+                                    const itemTotal = item.quantity * item.price;
+
+                                    orderItemsHtml += `
+                    <tr>
+                        <td>
+                            <img src="images/${item.image_path }" alt="${item.title}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        </td>
+                        <td>${item.title}</td>
+                        <td>$${parseFloat(item.price).toFixed(2)}</td>
+                        <td>${item.quantity}</td>
+                        <td>$${itemTotal.toFixed(2)}</td>
+                    </tr>
+                `;
+                                });
+
+                                orderItemsHtml += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+                                orderContainer.innerHTML = orderItemsHtml;
+                                document.getElementById('order-modal-total').textContent = totalCost.toFixed(2);
+                            })
+                            .catch(error => {
+                                console.error('Error loading order details:', error);
+                                orderContainer.innerHTML = '<div class="text-center text-danger">Error loading order details</div>';
+                            });
+                    }
                 });
             </script>
 </body>
