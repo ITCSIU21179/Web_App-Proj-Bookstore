@@ -233,7 +233,7 @@
                 const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
                 loginModal.show();
             } else {
-                window.location.href = '/profile';
+                window.location.href = '/profile'; 
             }
         });
 
@@ -243,7 +243,7 @@
 
             const formData = new FormData(loginForm);
             const isAdminLogin = formData.get('adminLogin') === 'on';
-            const loginEndpoint = isAdminLogin ? '/login-admin' : '/login';
+            const loginEndpoint = isAdminLogin ? '/admin/login' : '/login';
 
             fetch(loginEndpoint, {
                 method: 'POST',
@@ -258,7 +258,7 @@
                 if (data.success) {
                     if (isAdminLogin) {
                         // For admin login, redirect to admin dashboard
-                        window.location.href = data.redirectUrl || '/admin-dashboard';
+                        window.location.href = data.redirectUrl || '/admin/dashboard';
                     } else {
                         // For regular user login, reload the page
                         window.location.reload();
