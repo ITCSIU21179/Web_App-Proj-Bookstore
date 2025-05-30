@@ -124,6 +124,24 @@ const checkoutPage = async (req, res) => {
   }
 };
 
+const getBookById = async (req, res) => {
+  try {
+    const bookId = req.params.book_id;
+    const bookDetail = await productModel.getBookDetail(bookId);
+    if (!bookDetail) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    res.render('book_detail.ejs', {
+      isLoggedIn : req.session && req.session.user ? true : false,
+      NameOfUser : req.session && req.session.user ? req.session.user.name : null,
+      bookDetail
+    });
+  } catch (error) {
+    console.error('Error fetching book detail:', error);
+    res.status(500).json({ error: 'Failed to fetch book detail' });
+  }
+}
+
 module.exports = {
   getAllBooks,
   addBookToCart,
@@ -131,5 +149,6 @@ module.exports = {
   updateCartItems,
   removeFromCart,
   processCheckout,
-  checkoutPage
+  checkoutPage,
+  getBookById,
 };
