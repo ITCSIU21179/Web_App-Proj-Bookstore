@@ -90,8 +90,6 @@ const removeCartItem = async (item_id) => {
   return result;
 };
 
-
-
 const createNewOrder = async (customer_id, cartItems, cart_id) => {
   // Get connection from pool for transaction
   const connection = await pool.getConnection();
@@ -156,6 +154,27 @@ const releaseCartItems = async (connection, cart_id) => {
   return result;
 };
 
+const getBookDetail = async (book_id) => {
+  const [rows] = await pool.query(`
+    SELECT 
+      Books.book_id, 
+      Books.title, 
+      Books.price, 
+      Books.description,
+      GROUP_CONCAT(DISTINCT Authors.name) AS author_names,
+      GROUP_CONCAT(DISTINCT Disciplines.name) AS discipline_names,
+      Books.image_path
+    FROM Books
+    JOIN BookAuthors ON Books.book_id = BookAuthors.book_id
+    JOIN Authors ON BookAuthors.author_id = Authors.author_id
+    JOIN BookDisciplines ON Books.book_id = BookDisciplines.book_id
+    JOIN Disciplines ON BookDisciplines.discipline_id = Disciplines.discipline_id
+    WHERE Books.book_id = ?
+    GROUP BY Books.book_id, Books.title, Books.price, Books.description, Books.image_path
+  `, [book_id]);
+  return rows[0];
+}
+
 module.exports = {
   getAllBooks,
   addBookToCart,
@@ -165,5 +184,6 @@ module.exports = {
   updateCartItemQuantity,
   // updateCartItemQuantityByItemId,
   removeCartItem,
-  createNewOrder
+  createNewOrder,
+  getBookDetail,
 };

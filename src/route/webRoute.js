@@ -12,11 +12,11 @@ const {
   logout
 } = require('../controller/authController');
 
-const {getAllBooks} = require('../controller/productController');
+const {getAllBooks, getBookById} = require('../controller/productController');
 const { 
   getProfile,
   editProfile,
-  getOrderItems 
+  getOrderItems, 
 } = require('../controller/customerController');
 
 const { 
@@ -50,7 +50,7 @@ router.get('/logout', logout);
 
 // 2. Products data 
 router.get('/allbooks',getAllBooks);
-// router.get('/book/:id', getBookById);
+router.get('/book/:book_id', getBookById);
 
 
 // 3. User protected routes 

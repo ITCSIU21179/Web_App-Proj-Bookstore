@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>BookSaw - <%= bookDetail.title %></title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/icomoon/icomoon.css">
+    <link rel="stylesheet" type="text/css" href="/css/vendor.css">
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/cart_style.css">
+
+    <style>
+        .book-detail-section {
+            padding: 80px 0;
+            background-color: #f9f9f9;
+        }
+
+        .book-detail-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+        }
+
+        .book-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .book-authors {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .book-disciplines {
+            margin-bottom: 20px;
+        }
+
+        .discipline-tag {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .book-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fb9678;
+            margin-bottom: 25px;
+        }
+
+        .book-description {
+            color: #444;
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .quantity-selector label {
+            margin-right: 15px;
+            font-weight: 500;
+        }
+
+        .quantity-selector input {
+            width: 60px;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .add-to-cart-btn {
+            background-color: #fb9678;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #f37e5c;
+        }
+
+        .back-to-shop {
+            display: inline-block;
+            margin-top: 30px;
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-to-shop:hover {
+            color: #fb9678;
+        }
+
+        .cart-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #fb9678;
+            color: white;
+            border-radius: 4px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+            pointer-events: none;
+        }
+
+        .cart-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .cart-notification.error {
+            background-color: #ff5252;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/header') %>
+
+    <section class="book-detail-section">
+        <div class="container">
+            <div class="book-detail-container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="/images/<%= bookDetail.image_path || 'tab-item1.jpg' %>" alt="<%= bookDetail.title %>" class="book-image">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="book-info">
+                            <h1><%= bookDetail.title %></h1>
+                            <div class="book-authors">By <%= bookDetail.author_names %></div>
+                            
+                            <div class="book-disciplines">
+                                <% bookDetail.discipline_names.split(',').forEach(function(discipline) { %>
+                                    <span class="discipline-tag"><%= discipline.trim() %></span>
+                                <% }); %>
+                            </div>
+                            
+                            <div class="book-price">$<%= parseFloat(bookDetail.price).toFixed(2) %></div>
+                            
+                            <div class="book-description">
+                                <% if (bookDetail.description) { %>
+                                    <%= bookDetail.description %>
+                                <% } else { %>
+                                    No description available for this book.
+                                <% } %>
+                            </div>
+                            
+                            <div class="quantity-selector">
+                                <label for="quantity">Quantity:</label>
+                                <input type="number" id="quantity" name="quantity" value="1" min="1" max="10">
+                            </div>
+                            
+                            <button id="add-to-cart-btn" class="add-to-cart-btn" data-book-id="<%= bookDetail.book_id %>">
+                                Add to Cart
+                            </button>
+                            
+                            <div>
+                                <a href="/homepage" class="back-to-shop">
+                                    <i class="icon icon-arrow-left"></i> Back to Shop
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <script src="/js/jquery-1.11.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to show notifications
+            function showNotification(message, type = 'success') {
+                // Create notification element if it doesn't exist
+                let notification = document.querySelector('.cart-notification');
+                if (!notification) {
+                    notification = document.createElement('div');
+                    notification.className = 'cart-notification';
+                    document.body.appendChild(notification);
+                }
+
+                // Set message and type
+                notification.textContent = message;
+                notification.className = `cart-notification ${type}`;
+
+                // Show notification
+                notification.classList.add('show');
+
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    // Remove from DOM after animation completes
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }
+
+            // Function to update cart total display
+            function updateCartTotal() {
+                // Only proceed if user is logged in
+                const isLoggedIn = <%= (typeof isLoggedIn !== 'undefined' && isLoggedIn) ? 'true' : 'false' %>;
+                if (!isLoggedIn) return;
+
+                // Fetch updated cart info
+                fetch('/cart-info')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch cart data');
+                        }
+                        return response.json();
+                    })
+                    .then(cartItems => {
+                        // Calculate total cost
+                        let totalCost = 0;
+                        cartItems.forEach(item => {
+                            totalCost += item.quantity * item.price;
+                        });
+
+                        // Update cart display in header
+                        const cartElement = document.querySelector('.cart.for-buy span');
+                        cartElement.textContent = `Cart:(${totalCost.toFixed(2)}$)`;
+                    })
+                    .catch(error => {
+                        console.error('Error updating cart display:', error);
+                    });
+            }
+
+            // Initialize cart total
+            updateCartTotal();
+
+            // Add to Cart button functionality
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', function() {
+                    const bookId = this.getAttribute('data-book-id');
+                    const quantity = parseInt(document.getElementById('quantity').value);
+                    
+                    // Validate quantity
+                    if (quantity < 1 || quantity > 10) {
+                        showNotification('Please select a quantity between 1 and 10', 'error');
+                        return;
+                    }
+
+                    // Check if user is logged in
+                    const isLoggedIn = <%= (typeof isLoggedIn !== 'undefined' && isLoggedIn) ? 'true' : 'false' %>;
+                    if (!isLoggedIn) {
+                        alert('Please log in to add items to your cart.');
+                        return;
+                    }
+
+                    // Send request to add to cart
+                    fetch('/add-to-cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ book_id: parseInt(bookId), quantity: quantity })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to add to cart');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Update cart display
+                        updateCartTotal();
+                        // Show success message
+                        showNotification('Book added to cart!');
+                    })
+                    .catch(error => {
+                        console.error('Error adding to cart:', error);
+                        showNotification('Could not add to cart. Please try again.', 'error');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
