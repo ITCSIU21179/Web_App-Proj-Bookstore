@@ -6,8 +6,8 @@ Web_App-Proj-Bookstore is a web application designed to manage and browse a coll
 
 ## Features
 
-- Browse and search books by title, author, or genre
-- Add, edit, and delete books (admin functionality)
+- Browse and search books by title, author, or genre //Under developing
+- Add, edit, and delete books (admin functionality) //Not implemented yet
 - User authentication and registration
 - Responsive user interface
 - Book details view with descriptions and cover images
@@ -31,7 +31,7 @@ Web_App-Proj-Bookstore is a web application designed to manage and browse a coll
    ```
 3. Start the development server:
    ```
-   npm start
+   npm run dev
    ```
 
 ## License
