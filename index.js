@@ -7,6 +7,9 @@ const webRoutes = require('./src/route/webRoute');
 
 const configViewEngine = require('./src/config/viewEngine');
 
+// Trust Azure's proxy
+app.set('trust proxy', 1);
+
 // Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'bookstore-secret-key',
@@ -16,7 +19,7 @@ app.use(session({
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 30 * 60 * 1000 // 0.5 hour
   }
 }));
