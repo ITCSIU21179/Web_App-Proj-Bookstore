@@ -14,10 +14,11 @@ Web_App-Proj-Bookstore is a web application designed to manage and browse a coll
 
 ## Technologies Used
 
-- Backend: Node.js, Express
-- Frontend: React (or specify your frontend framework)
-- Database: MongoDB (or your chosen database)
-- Authentication: JWT or session-based
+- Backend: Node.js, Express.js
+- Frontend: EJS, Bootstrap, Express.js
+- Database: MySQL
+- Authentication: session-based
+- Deployment: Azure
 
 ## Getting Started
 
