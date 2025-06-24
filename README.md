@@ -18,7 +18,7 @@ Web_App-Proj-Bookstore is a web application designed to manage and browse a coll
 - Frontend: EJS, Bootstrap, Express.js
 - Database: MySQL
 - Authentication: session-based
-- Deployment: Azure
+- Deployment: Azure (unavailable)
 
 ## Getting Started
 
